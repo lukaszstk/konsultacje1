@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FIRMA</title>
+</head>
+<body>
+    {% if last_saldo %}
+        <p>Ostatnie saldo: {{ last_saldo }}</p>
+    {% endif %}
+    <h4>Zmien saldo:</h4>
+    <form action="" method="post" ><div>
+        <input type="hidden" name="typ_forma" value="saldo">
+        <table style="background-color: silver">
+        <tr>
+            <td>Wprowadz ile ma wynosic saldo</td><td><input type="number" name="newsaldo"></td>
+        </tr>
+        <tr>
+            <br>
+            <td colspan="2" style="text-align: center"><br>
+                <input type="submit" value="Zmień">
+                <input type="reset" value="Wyczyść">
+            </td>
+        </tr>
+        </table>
+</div></form>
+
+    <hr>
+
+    <hr>
+
+    <h4>Kupno towaru:</h4>
+    <form action="" method="post" ><div>
+        <input type="hidden" name="typ_forma" value="kupno">
+        <table style="background-color: silver">
+        <tr>
+            <td>Nazwa produktu:</td><td><input type="text" name="nazwa"></td>
+        </tr>
+        <tr>
+            <td>Ilość:</td><td><input type="number" name="sztuk"></td>
+        </tr>
+            <tr>
+            <td>Cena:</td><td><input type="number" name="cena"></td>
+        </tr>
+        <tr>
+            <br>
+            <td colspan="2" style="text-align: center"><br>
+                <input type="submit" value="Zakup">
+                <input type="reset" value="Wyczyść">
+            </td>
+        </tr>
+        </table>
+</div></form>
+    <hr>
+    <h4>Sprzedaż towaru:</h4>
+    <form action="" method="post" ><div>
+        <input type="hidden" name="typ_forma" value="sprzedaz">
+        <table style="background-color: silver">
+        <tr>
+            <td>Nazwa produktu:</td><td><input type="text" name="nazwa"></td>
+        </tr>
+        <tr>
+            <td>Ilość:</td><td><input type="number" name="sztuk"></td>
+        </tr>
+            <tr>
+            <td>Cena:</td><td><input type="number" name="cena"></td>
+        </tr>
+        <tr>
+            <br>
+            <td colspan="2" style="text-align: center"><br>
+                <input type="submit" value="Sprzedaż">
+                <input type="reset" value="Wyczyść">
+            </td>
+        </tr>
+        </table>
+</div></form>
+</body>
+</html>
