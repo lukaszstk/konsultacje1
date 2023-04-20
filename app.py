@@ -1,10 +1,15 @@
 from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_alembic import Alembic
+from flask import flash
+from flask import redirect
+from flask import url_for
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///firma.db'
+app.config['SECRET_KEY'] = "supertrudnyklucz"
 db = SQLAlchemy(app)
+
 
 class Saldo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -13,20 +18,24 @@ class Saldo(db.Model):
     def __init__(self, saldo):
         self.saldo = saldo
 
+
 class Historia(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     operacja = db.Column(db.String(50), nullable=False)
-    nazwa = db.Column(db.String(50), nullable=False)
-    sztuk = db.Column(db.Integer, nullable=False)
+    nazwa = db.Column(db.String(50), nullable=True)
+    sztuk = db.Column(db.Integer, nullable=True)
     cena = db.Column(db.Float, nullable=False)
+
 
 class Przedmiot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nazwa = db.Column(db.String(50), nullable=False)
     sztuk = db.Column(db.Integer, nullable=False)
 
+
 alembic = Alembic()
 alembic.init_app(app)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def welcome():
@@ -35,15 +44,19 @@ def welcome():
         typ_forma = request.form.get('typ_forma')
         if typ_forma == 'saldo':
             newsaldo = float(request.form.get('newsaldo'))
-            saldo = newsaldo
-            sld = Saldo(saldo)
-            db.session.add(sld)
-            db.session.commit()
+            saldo = db.session.query(Saldo).order_by(-Saldo.id).first()
 
-            # # historia zapis
-            # historia_obj = Historia(operacja='saldo', nazwa=None, sztuk=None, cena=newsaldo)
-            # db.session.add(historia_obj)
-            # db.session.commit()
+            if saldo.saldo + newsaldo > 0:
+                saldo.saldo += newsaldo
+                db.session.add(saldo)
+                db.session.commit()
+
+                # historia zapis
+                historia_obj = Historia(operacja='saldo', nazwa=None, sztuk=None, cena=newsaldo)
+                db.session.add(historia_obj)
+                db.session.commit()
+            else:
+                flash("Nie można zmienić wartości konta, byłaby ona ujemna!")
         elif typ_forma == 'kupno':
             przedmiot = request.form.get('nazwa')
             sztuk = int(request.form.get('sztuk'))
@@ -88,7 +101,7 @@ def welcome():
                 if przedmiot_obj and przedmiot_obj.sztuk >= sztuk:
                     przedmiot_obj.sztuk -= sztuk
                 else:
-                    return "Niepoprawna sprzedaz"
+                    flash("Niepoprawna sprzedaz")
 
                 # zapisanie operacji w historii
                 historia_obj = Historia(operacja='sprzedaz', nazwa=przedmiot, sztuk=sztuk, cena=cena)
@@ -102,11 +115,14 @@ def welcome():
             else:
                 return "Nie można sprzedać przedmiotu, gdy saldo wynosi zero"
 
+        return redirect(url_for('welcome'))
+
     # pobranie ostatniego salda
     last_saldo_obj = Saldo.query.order_by(Saldo.id.desc()).first()
     if last_saldo_obj:
         last_saldo = last_saldo_obj.saldo
     return render_template('index.html', last_saldo=last_saldo)
+
 
 if __name__ == '__main__':
     with app.app_context():
